@@ -4,6 +4,8 @@ import { startFolderWatcher } from "./watcher/folderWatcher";
 import { renderStrip } from "./render/stripRenderer";
 import { Session } from "./domain/session";
 import { CLASSIC_3_TEMPLATE } from "./templates/classic-3";
+import { renderPaper } from "./render/paperRenderer";
+import { A4_5_STRIPS } from "./templates/paper-a4-5";
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -20,28 +22,36 @@ app.whenReady().then(() => {
   const win = createWindow();
   let session: Session | null = null;
 
-  const OUTPUT_PATH = path.join(app.getAppPath(), "public/strip.png");
+  const WATCHED_FOLDER = "/home/riciolus/Pictures/camera";
+  const STRIP_PATH = path.join(app.getAppPath(), "public/strip.png");
+  const PAPER_PATH = path.join(app.getAppPath(), "public/paper.png");
 
-  console.log(OUTPUT_PATH);
-
-  startFolderWatcher("/home/riciolus/Pictures/camera", async (photoPath) => {
+  startFolderWatcher(WATCHED_FOLDER, async (photoPath) => {
     if (!session || session.isReady()) {
       session = new Session(CLASSIC_3_TEMPLATE);
     }
 
-    session.addPhoto(photoPath);
+    // 🔒 SESSION DIAMANKAN
+    const currentSession = session;
 
-    // 🔥 INI YANG HILANG
+    currentSession.addPhoto(photoPath);
+
     win.webContents.send("session-updated", {
-      stage: session.getStage(),
-      photos: session.getPhotos().length,
+      stage: currentSession.getStage(),
+      photos: currentSession.getPhotos().length,
     });
 
-    if (session.isReady()) {
+    if (currentSession.isReady()) {
       await renderStrip({
         template: CLASSIC_3_TEMPLATE,
-        photos: session.getPhotos(),
-        outputPath: OUTPUT_PATH,
+        photos: currentSession.getPhotos(),
+        outputPath: STRIP_PATH,
+      });
+
+      await renderPaper({
+        paper: A4_5_STRIPS,
+        stripPath: STRIP_PATH,
+        outputPath: PAPER_PATH,
       });
 
       win.webContents.send("strip-ready");

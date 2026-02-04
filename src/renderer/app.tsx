@@ -34,7 +34,7 @@ export default function App() {
       )}
 
       <img
-        src={`/strip.png?v=${version}`}
+        src={`/paper.png?v=${version}`}
         style={{ width: 300, border: "1px solid #ccc" }}
       />
     </div>
