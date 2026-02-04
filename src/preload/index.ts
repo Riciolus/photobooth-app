@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { pathToFileURL } from "url";
 
 console.log("🔥 PRELOAD LOADED");
 
@@ -13,7 +12,6 @@ contextBridge.exposeInMainWorld("api", {
     });
   },
 
-  onStripReady: (cb: () => void) => {
-    ipcRenderer.on("strip-ready", cb);
-  },
+  onStripReady: (cb: (strip: { index: number; path: string }) => void) =>
+    ipcRenderer.on("strip-ready", (_e, data) => cb(data)),
 });

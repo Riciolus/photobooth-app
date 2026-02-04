@@ -1,23 +1,35 @@
-export type SessionStage = "IDLE" |"COLLECTING" | "READY" | "PRINTING" | "DONE"
+export type SessionStage = "IDLE" | "COLLECTING" | "READY" | "PRINTING" | "DONE";
 
 export type StripTemplate = {
-  id: string                // e.g. "classic-3"
-  slots: number             // how many photos (3, 4, etc)
+  id: string;
 
   canvas: {
-    width: number           // px
-    height: number          // px
-    background: string      // color or image path
-  }
+    width: number;
+    height: number;
+    backgroundImage: string; // path relatif / asset name
+  };
 
-  photo: {
-    aspectRatio: number    // e.g. 2 / 3
-    borderRadius: number   // px
-  }
+  photoSlots: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }[];
+};
 
-  layout: {
-    padding: number        // px (outer margin)
-    spacing: number        // px (between photos)
-    align: "top" | "center"
-  }
-}
+export type PhotoSlot = {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type EditableTemplate = {
+  backgroundImage: string | null;
+  canvas: {
+    width: number;
+    height: number;
+  };
+  slots: PhotoSlot[] | [];
+};

@@ -1,50 +1,56 @@
-import fs from "fs/promises"
-import path from "path"
-import sharp from "sharp"
-import { computePhotoRects } from "./layout/computePhotoRects"
+import sharp from "sharp";
+import fs from "fs/promises";
+import path from "path";
+import { StripTemplate } from "src/shared/types";
+
+type RenderStripInput = {
+  template: StripTemplate;
+  photos: string[];
+  outputPath: string;
+};
 
 export async function renderStrip({
   template,
   photos,
   outputPath,
-}: {
-  template: any
-  photos: string[]
-  outputPath: string
-}) {
-  // 🔑 ENSURE DIRECTORY EXISTS
-  const dir = path.dirname(outputPath)
-  await fs.mkdir(dir, { recursive: true })
+}: RenderStripInput) {
+  if (photos.length !== template.slots) {
+    throw new Error(`Expected ${template.slots} photos, got ${photos.length}`);
+  }
 
-  // lanjut render seperti biasa
-  const canvas = sharp({
-  create: {
-    width: template.canvas.width,
-    height: template.canvas.height,
-    channels: 4,
-    background: template.canvas.background,
-  },
-})
+  if (template.photoSlots.length !== template.slots) {
+    throw new Error(
+      `Template photoSlots (${template.photoSlots.length}) does not match slots (${template.slots})`
+    );
+  }
 
+  // 1️⃣ ensure output dir exists
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
-  const rects = computePhotoRects(template)
+  // 2️⃣ load background PNG
+  const base = sharp(template.background.imagePath).resize(
+    template.background.width,
+    template.background.height,
+    { fit: "fill" }
+  );
 
-const composites = await Promise.all(
-  photos.map(async (photoPath, index) => {
-    const rect = rects[index]
+  // 3️⃣ prepare composites
+  const composites = await Promise.all(
+    photos.map(async (photoPath, index) => {
+      const slot = template.photoSlots[index];
 
-    const img = await sharp(photoPath)
-      .resize(rect.width, rect.height)
-      .toBuffer()
+      const buffer = await sharp(photoPath)
+        .resize(Math.round(slot.width), Math.round(slot.height), { fit: "cover" })
+        .toBuffer();
 
-    return {
-      input: img,
-      top: rect.y,
-      left: rect.x,
-    }
-  })
-)
+      return {
+        input: buffer,
+        top: Math.round(slot.y),
+        left: Math.round(slot.x),
+      };
+    })
+  );
 
-
-  await canvas.composite(composites).png().toFile(outputPath)
+  // 4️⃣ composite & export
+  await base.composite(composites).png().toFile(outputPath);
 }
