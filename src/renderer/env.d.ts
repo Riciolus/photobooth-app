@@ -5,7 +5,7 @@ declare global {
     api: {
       startSession: () => Promise<void>
       onSessionUpdated: (callback: (state: SessionState) => void) => void
-      onStripReady: () => void
+      onStripReady: (cb: (url: string) => void ) => void
     }
   }
 }

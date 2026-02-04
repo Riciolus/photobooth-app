@@ -1,55 +1,50 @@
-import { app, BrowserWindow } from "electron"
-import path from "path"
+import { app, BrowserWindow } from "electron";
+import path from "path";
+import { startFolderWatcher } from "./watcher/folderWatcher";
+import { renderStrip } from "./render/stripRenderer";
+import { Session } from "./domain/session";
+import { CLASSIC_3_TEMPLATE } from "./templates/classic-3";
 
-import { startFolderWatcher } from "./watcher/folderWatcher"
-import { renderStrip } from "./render/stripRenderer"
-import { Session } from "./domain/session"
-import { CLASSIC_3_TEMPLATE } from "./templates/classic-3"
-
-const WATCHED_FOLDER = "/home/riciolus/Pictures/camera"
-const OUTPUT_PATH = "/home/riciolus/Pictures/output/strip.png"
-
-function createWindow(): BrowserWindow {
+function createWindow() {
   const win = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, "index.js"),
     },
-  })
+  });
 
-  win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL!)
-  return win
+  win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL!);
+  return win;
 }
 
 app.whenReady().then(() => {
-  const mainWindow = createWindow()
+  const win = createWindow();
+  let session: Session | null = null;
 
-  let session: Session | null = null
+  const OUTPUT_PATH = path.join(app.getAppPath(), "public/strip.png");
 
-  startFolderWatcher(WATCHED_FOLDER, async (photoPath) => {
+  console.log(OUTPUT_PATH);
+
+  startFolderWatcher("/home/riciolus/Pictures/camera", async (photoPath) => {
     if (!session || session.isReady()) {
-      session = new Session(CLASSIC_3_TEMPLATE)
+      session = new Session(CLASSIC_3_TEMPLATE);
     }
 
-    session.addPhoto(photoPath)
+    session.addPhoto(photoPath);
+
+    // 🔥 INI YANG HILANG
+    win.webContents.send("session-updated", {
+      stage: session.getStage(),
+      photos: session.getPhotos().length,
+    });
 
     if (session.isReady()) {
       await renderStrip({
         template: CLASSIC_3_TEMPLATE,
         photos: session.getPhotos(),
         outputPath: OUTPUT_PATH,
-      })
+      });
 
-      mainWindow.webContents.send("strip-ready", {
-      path: OUTPUT_PATH,
-    }  )
-
-
-      console.log("🖨 Strip rendered:", OUTPUT_PATH)
+      win.webContents.send("strip-ready");
     }
-
-    mainWindow.webContents.send("session-updated", {
-      stage: session.getStage(),
-      photos: session.getPhotos().length,
-    })
-  })
-})
+  });
+});
