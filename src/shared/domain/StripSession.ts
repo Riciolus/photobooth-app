@@ -1,6 +1,6 @@
 import { SessionStage, StripTemplate } from "src/shared/types";
 
-export class Session {
+export class StripSession {
   private stage: SessionStage = "IDLE";
   private photos: string[] = [];
   private template: StripTemplate;
@@ -9,11 +9,11 @@ export class Session {
     this.template = template;
   }
 
-  getTemplate() {
-    return this.template;
-  }
-
   addPhoto(path: string) {
+    if (!this.template.photoSlots) {
+      throw new Error("Template.photoSlots is missing");
+    }
+
     if (this.stage === "READY") return;
 
     if (this.stage === "IDLE") {
@@ -22,21 +22,30 @@ export class Session {
 
     this.photos.push(path);
 
-    if (this.photos.length === this.template.slots) {
+    if (this.photos.length === this.template.photoSlots.length) {
       this.stage = "READY";
-      console.log("🎉 Session READY", this.photos);
+      console.log("🎉 StripSession READY", this.photos);
     }
   }
 
-  isReady() {
-    return this.stage === "READY";
+  getStage() {
+    return this.stage;
   }
 
   getPhotos() {
     return [...this.photos];
   }
 
-  getStage() {
-    return this.stage;
+  getTemplate() {
+    return this.template;
+  }
+
+  isReady() {
+    return this.stage === "READY";
+  }
+
+  reset() {
+    this.stage = "IDLE";
+    this.photos = [];
   }
 }

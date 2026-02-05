@@ -9,12 +9,7 @@ export type StripTemplate = {
     backgroundImage: string; // path relatif / asset name
   };
 
-  photoSlots: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }[];
+  photoSlots: PhotoSlot[];
 };
 
 export type PhotoSlot = {

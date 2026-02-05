@@ -1,6 +1,6 @@
-import sharp from "sharp";
 import fs from "fs/promises";
 import path from "path";
+import sharp from "sharp";
 import { StripTemplate } from "src/shared/types";
 
 type RenderStripInput = {
@@ -14,25 +14,30 @@ export async function renderStrip({
   photos,
   outputPath,
 }: RenderStripInput) {
-  if (photos.length !== template.slots) {
-    throw new Error(`Expected ${template.slots} photos, got ${photos.length}`);
-  }
+  const expectedPhotos = template.photoSlots.length;
 
-  if (template.photoSlots.length !== template.slots) {
-    throw new Error(
-      `Template photoSlots (${template.photoSlots.length}) does not match slots (${template.slots})`
-    );
+  if (photos.length !== expectedPhotos) {
+    throw new Error(`Expected ${expectedPhotos} photos, got ${photos.length}`);
   }
 
   // 1️⃣ ensure output dir exists
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
-  // 2️⃣ load background PNG
-  const base = sharp(template.background.imagePath).resize(
-    template.background.width,
-    template.background.height,
-    { fit: "fill" }
-  );
+  // 2️⃣ create base canvas
+  const base = template.canvas.backgroundImage
+    ? sharp(template.canvas.backgroundImage).resize(
+        template.canvas.width,
+        template.canvas.height,
+        { fit: "fill" }
+      )
+    : sharp({
+        create: {
+          width: template.canvas.width,
+          height: template.canvas.height,
+          channels: 4,
+          background: "#ffffff",
+        },
+      });
 
   // 3️⃣ prepare composites
   const composites = await Promise.all(

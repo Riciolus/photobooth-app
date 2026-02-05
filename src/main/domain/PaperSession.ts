@@ -1,16 +1,20 @@
-import { Session } from "./session";
-import { StripTemplate } from "src/shared/types";
+import { StripSession } from "../../shared/domain/StripSession";
+import { StripTemplate } from "../../shared/types";
 
 export type StripResult = {
   id: number;
   path: string;
 };
 
+type CompletedStrip = {
+  photos: string[];
+};
+
 export class PaperSession {
   private maxStrips: number;
   private template: StripTemplate;
 
-  private currentSession: Session | null = null;
+  private currentSession: StripSession | null = null;
   private completedStrips: StripResult[] = [];
 
   constructor(template: StripTemplate, maxStrips = 5) {
@@ -25,7 +29,7 @@ export class PaperSession {
       return;
     }
 
-    this.currentSession = new Session(this.template);
+    this.currentSession = new StripSession(this.template);
   }
 
   addPhoto(path: string) {
@@ -34,14 +38,10 @@ export class PaperSession {
     this.currentSession.addPhoto(path);
   }
 
-  completeCurrentSession(renderedPath: string) {
-    if (!this.currentSession || !this.currentSession.isReady()) {
-      throw new Error("Current session not ready");
-    }
-
+  completeCurrentSession(path: string) {
     this.completedStrips.push({
       id: this.completedStrips.length + 1,
-      path: renderedPath,
+      path,
     });
 
     this.startNewSession();

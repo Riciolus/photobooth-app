@@ -1,72 +1,80 @@
-import { app, BrowserWindow, protocol } from "electron";
+import { app, BrowserWindow, protocol, ipcMain } from "electron";
 import path from "path";
+
 import { startFolderWatcher } from "./watcher/folderWatcher";
 import { renderStrip } from "./render/stripRenderer";
-import { Session } from "./domain/session";
-import { renderPaper } from "./render/paperRenderer";
 import { PaperSession } from "./domain/PaperSession";
-import { INTERNS_FAREWELL_TEMPLATE } from "./templates/interns-farewell";
+import { StripTemplate } from "../shared/types";
+
+let win: BrowserWindow | null = null;
+let paperSession: PaperSession | null = null;
+
+const WATCHED_FOLDER = "/home/riciolus/Pictures/camera";
 
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, "index.js"),
     },
   });
 
   win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL!);
-  return win;
 }
 
 app.whenReady().then(() => {
+  // ✅ custom protocol for strip:// preview
   protocol.registerFileProtocol("strip", (request, callback) => {
     const filePath = decodeURI(request.url.replace("strip://", ""));
     callback({ path: filePath });
   });
 
-  const win = createWindow();
-  const paperSession = new PaperSession(INTERNS_FAREWELL_TEMPLATE, 5);
-  let session: Session | null = null;
+  createWindow();
 
-  const WATCHED_FOLDER = "/home/riciolus/Pictures/camera";
+  // ============================
+  // IPC: START SESSION (FROM UI)
+  // ============================
+  ipcMain.on("start-session", (_, template: StripTemplate) => {
+    console.log("🟢 start-session received");
+    console.log("📦 TEMPLATE RECEIVED", template);
 
-  const PAPER_PATH = path.join(app.getAppPath(), "public/paper.png");
+    paperSession = new PaperSession(template, 5);
 
+    const current = paperSession.getCurrentSession();
+    if (!current || !win) return;
+
+    // 🔥 send initial state to unblock UI
+    win.webContents.send("session-updated", {
+      stage: current.getStage(),
+      photos: 0,
+      strips: [],
+    });
+  });
+
+  // ============================
+  // FOLDER WATCHER
+  // ============================
   startFolderWatcher(WATCHED_FOLDER, async (photoPath) => {
-    // 1️⃣ foto masuk
+    if (!paperSession || !win) return;
+
     paperSession.addPhoto(photoPath);
 
-    const currentSession = paperSession.getCurrentSession();
-    if (!currentSession) return;
+    const current = paperSession.getCurrentSession();
+    if (!current) return;
 
-    // 2️⃣ update UI (collecting)
-    win.webContents.send("session-updated", {
-      stage: currentSession.getStage(),
-      photos: currentSession.getPhotos().length,
+    // update UI
+    win.webContents.send("photo-added", { path: photoPath });
+
+    if (!current.isReady()) return;
+
+    const stripIndex = paperSession.getCompletedStrips().length + 1;
+    const STRIP_PATH = path.join(app.getAppPath(), `public/strip_${stripIndex}.png`);
+
+    // 🔒 COMMIT AFTER RENDER
+    paperSession.completeCurrentSession(STRIP_PATH);
+
+    win.webContents.send("strip-ready", {
+      index: stripIndex,
+      path: STRIP_PATH,
     });
-
-    // 3️⃣ kalau strip READY
-    if (currentSession.isReady()) {
-      const stripIndex = paperSession.getCompletedStrips().length + 1;
-      const STRIP_PATH = path.join(
-        app.getAppPath(),
-        `public/strip_${stripIndex}.png`
-      );
-
-      await renderStrip({
-        template: currentSession.getTemplate(),
-        photos: currentSession.getPhotos(),
-        outputPath: STRIP_PATH,
-      });
-
-      // 4️⃣ commit strip ke PaperSession
-      paperSession.completeCurrentSession(STRIP_PATH);
-
-      // 5️⃣ notify UI strip slot
-      win.webContents.send("strip-ready", {
-        index: stripIndex,
-        path: STRIP_PATH,
-      });
-    }
   });
 });
