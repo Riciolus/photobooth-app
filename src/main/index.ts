@@ -9,13 +9,14 @@ import { StripTemplate } from "../shared/types";
 let win: BrowserWindow | null = null;
 let paperSession: PaperSession | null = null;
 
-const WATCHED_FOLDER = "/home/riciolus/Pictures/camera";
+const WATCHED_FOLDER = "/home/riciolus/Pictures/Camera";
 
 function createWindow() {
   win = new BrowserWindow({
     webPreferences: {
       preload: path.join(__dirname, "index.js"),
     },
+    autoHideMenuBar: true,
   });
 
   win.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL!);

@@ -6,7 +6,7 @@ type Props = {
   onChange: (t: EditableTemplate) => void;
 };
 
-const SCALE = 0.3; // contoh, nanti bisa dynamic
+const SCALE = 0.5; // contoh, nanti bisa dynamic
 
 export function CanvasStage({ template, onChange }: Props) {
   function updateSlot(updatedSlot: PhotoSlot) {
@@ -17,21 +17,20 @@ export function CanvasStage({ template, onChange }: Props) {
   }
 
   return (
-    <div style={{ overflow: "auto", padding: 20 }}>
+    <div className="w-full h-screen flex justify-center ">
       <div
+        className="relative"
         style={{
-          position: "relative",
           width: template.canvas.width,
           height: template.canvas.height,
           backgroundImage: `url(${template.backgroundImage})`,
-          backgroundRepeat: "no-repeat",
           backgroundSize: "contain",
           transform: `scale(${SCALE})`,
           transformOrigin: "top left",
         }}
       >
-        {template.slots.map((slot) => (
-          <SlotOverlay key={slot.id} slot={slot} onChange={updateSlot} />
+        {template.slots.map((slot, idx) => (
+          <SlotOverlay key={slot.id} idx={idx} slot={slot} onChange={updateSlot} />
         ))}
       </div>
     </div>

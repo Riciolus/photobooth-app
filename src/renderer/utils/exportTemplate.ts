@@ -13,6 +13,7 @@ export function exportStripTemplate(editable: EditableTemplate): StripTemplate {
       height: editable.canvas.height,
       backgroundImage: editable.backgroundImage,
     },
+
     photoSlots: editable.slots.map((slot) => ({
       x: Math.round(slot.x),
       y: Math.round(slot.y),

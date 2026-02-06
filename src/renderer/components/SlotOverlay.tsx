@@ -3,10 +3,38 @@ import { PhotoSlot } from "src/shared/types";
 
 type Props = {
   slot: PhotoSlot;
+  idx: number;
   onChange: (slot: PhotoSlot) => void;
 };
 
-export function SlotOverlay({ slot, onChange }: Props) {
+const SLOT_COLORS = [
+  {
+    bg: "bg-red-200/50",
+    border: "border-red-500",
+    handle: "bg-red-500",
+    text: "text-red-700",
+  },
+  {
+    bg: "bg-green-200/50",
+    border: "border-green-500",
+    handle: "bg-green-500",
+    text: "text-green-700",
+  },
+  {
+    bg: "bg-blue-200/50",
+    border: "border-blue-500",
+    handle: "bg-blue-500",
+    text: "text-blue-700",
+  },
+  {
+    bg: "bg-yellow-200/50",
+    border: "border-yellow-500",
+    handle: "bg-yellow-500",
+    text: "text-yellow-700",
+  },
+];
+
+export function SlotOverlay({ slot, onChange, idx }: Props) {
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
   const resizeRef = useRef<{ w: number; h: number; sx: number; sy: number } | null>(
     null
@@ -69,8 +97,16 @@ export function SlotOverlay({ slot, onChange }: Props) {
     e.currentTarget.releasePointerCapture(e.pointerId);
   }
 
+  const color = SLOT_COLORS[idx % SLOT_COLORS.length];
+
   return (
     <div
+      className={`
+      ${color.bg}
+      ${color.border}
+      flex justify-center items-center
+      border-2 border-dashed
+    `}
       onPointerDown={onPointerDownMove}
       onPointerMove={onPointerMoveMove}
       onPointerUp={onPointerUpMove}
@@ -80,23 +116,26 @@ export function SlotOverlay({ slot, onChange }: Props) {
         top: slot.y,
         width: slot.width,
         height: slot.height,
-        border: "2px dashed red",
         boxSizing: "border-box",
         cursor: "move",
       }}
     >
+      <div className={`text-5xl font-semibold font-sans ${color.text}`}>
+        {idx + 1}
+      </div>
+
       {/* Resize handle */}
       <div
         onPointerDown={onPointerDownResize}
         onPointerMove={onPointerMoveResize}
         onPointerUp={onPointerUpResize}
+        className={`${color.handle}`}
         style={{
           position: "absolute",
           right: -6,
           bottom: -6,
           width: 12,
           height: 12,
-          background: "red",
           cursor: "nwse-resize",
         }}
       />

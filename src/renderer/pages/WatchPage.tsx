@@ -4,7 +4,7 @@ import { StripPreviewState } from "../App";
 
 const A4_WIDTH = 2480;
 const A4_HEIGHT = 3508;
-const PREVIEW_SCALE = 0.18; // adjust zoom
+const PREVIEW_SCALE = 0.2; // adjust zoom
 
 type Props = {
   template: StripTemplate;
@@ -17,15 +17,7 @@ export default function WatchPage({ template, strips }: Props) {
   );
 
   return (
-    <div
-      style={{
-        width: A4_WIDTH * PREVIEW_SCALE,
-        height: A4_HEIGHT * PREVIEW_SCALE,
-        margin: "0 auto",
-        background: "#eee",
-        overflow: "hidden",
-      }}
-    >
+    <div className="text-[#121212] p-3 flex w-full h-screen bg-[#fefefe]">
       {/* PAPER */}
       <div
         style={{
