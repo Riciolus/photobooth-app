@@ -1,14 +1,20 @@
 import { EditableTemplate, PhotoSlot } from "src/shared/types";
 import { SlotOverlay } from "./SlotOverlay";
+import { useState } from "react";
 
 type Props = {
   template: EditableTemplate;
   onChange: (t: EditableTemplate) => void;
 };
 
-const SCALE = 0.5; // contoh, nanti bisa dynamic
+const SCALE = 0.4; // contoh, nanti bisa dynamic
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 1.5;
+const STEP = 0.1;
 
 export function CanvasStage({ template, onChange }: Props) {
+  const [scale, setScale] = useState(0.4);
+
   function updateSlot(updatedSlot: PhotoSlot) {
     onChange({
       ...template,
@@ -16,22 +22,66 @@ export function CanvasStage({ template, onChange }: Props) {
     });
   }
 
+  function zoomIn() {
+    setScale((s) => Math.min(MAX_SCALE, +(s + STEP).toFixed(2)));
+  }
+
+  function zoomOut() {
+    setScale((s) => Math.max(MIN_SCALE, +(s - STEP).toFixed(2)));
+  }
+
   return (
-    <div className="w-full h-screen flex justify-center ">
-      <div
-        className="relative"
-        style={{
-          width: template.canvas.width,
-          height: template.canvas.height,
-          backgroundImage: `url(${template.backgroundImage})`,
-          backgroundSize: "contain",
-          transform: `scale(${SCALE})`,
-          transformOrigin: "top left",
-        }}
-      >
-        {template.slots.map((slot, idx) => (
-          <SlotOverlay key={slot.id} idx={idx} slot={slot} onChange={updateSlot} />
-        ))}
+    <div className="relative w-full h-full bg-[#fff9f1] rounded-3xl overflow-hidden">
+      {/* ZOOM CONTROLS */}
+      <div className="absolute top-4 right-4 z-10 flex gap-2">
+        <button
+          onClick={zoomOut}
+          className="px-3 py-1 rounded-lg bg-white shadow font-mono"
+        >
+          −
+        </button>
+        <div className="px-3 py-1 rounded-lg bg-white shadow font-mono">
+          {Math.round(scale * 100)}%
+        </div>
+        <button
+          onClick={zoomIn}
+          className="px-3 py-1 rounded-lg bg-white shadow font-mono"
+        >
+          +
+        </button>
+      </div>
+
+      {/* VIEWPORT */}
+      <div className="w-full h-full flex items-center justify-center">
+        {/* SCALE WRAPPER */}
+        <div
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: "center",
+          }}
+        >
+          {/* REAL CANVAS */}
+          <div
+            className="relative"
+            style={{
+              width: template.canvas.width,
+              height: template.canvas.height,
+              backgroundImage: `url(${template.backgroundImage})`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "contain",
+              backgroundPosition: "center",
+            }}
+          >
+            {template.slots.map((slot, idx) => (
+              <SlotOverlay
+                key={slot.id}
+                idx={idx}
+                slot={slot}
+                onChange={updateSlot}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

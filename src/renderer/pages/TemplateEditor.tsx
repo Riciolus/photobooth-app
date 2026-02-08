@@ -3,6 +3,7 @@ import { EditableTemplate, PhotoSlot, StripTemplate } from "src/shared/types";
 import { CanvasStage } from "../components/CanvasStage";
 import { exportStripTemplate } from "../utils/exportTemplate";
 import { Button } from "../ui/Button";
+import clsx from "clsx";
 
 type Props = {
   onSave: (template: StripTemplate) => void;
@@ -54,30 +55,49 @@ export default function TemplateEditor({ onSave }: Props) {
   }
 
   return (
-    <div className="text-[#121212] p-3 flex h-screen bg-[#fefefe]">
+    <div className="text-[#232020]  flex h-screen bg-[#ffdfc7]">
       {/* Toolbar */}
-      <div className="w-60 border space-y-4 border-[#242827] bg-lime-700/5  rounded-3xl p-3">
-        <Button className="w-40" onClick={handleAddSlot}>
-          Add Slot
-        </Button>
+      <div className="w-60  space-y-4 px-3 py-8">
+        <div className="text-xl text-center font-mono font-semibold italic tracking-tighter">
+          Loco Booth
+        </div>
 
-        <input
-          className="w-40"
-          type="file"
-          accept="image/png"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleBackgroundUpload(file);
-          }}
-        />
+        <div className="space-y-3">
+          <label
+            className={clsx(
+              "inline-flex items-center justify-center cursor-pointer p-2 w-40",
+              "font-mono font-semibold text-sm  rounded-2xl",
+              "transition-colors focus-within:ring-2 focus-within:ring-offset-2",
+              "bg-[#F06647] border-2 border-yellow-900 text-yellow-950",
+              "hover:bg-lime-500/10"
+            )}
+          >
+            Upload Strip
+            <input
+              type="file"
+              accept="image/png"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleBackgroundUpload(file);
+              }}
+            />
+          </label>
 
-        <Button className="w-40" onClick={handleSave}>
-          Save Template
-        </Button>
+          <Button className="w-40" onClick={handleAddSlot}>
+            Add Slot
+          </Button>
+
+          <Button className="w-40" onClick={handleSave}>
+            Save Template
+          </Button>
+        </div>
       </div>
 
       {/* Canvas */}
-      <CanvasStage template={template} onChange={setTemplate} />
+      <div className="w-full py-3 pr-3 max-h-screen h-full">
+        <CanvasStage template={template} onChange={setTemplate} />
+      </div>
     </div>
   );
 }
