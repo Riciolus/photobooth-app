@@ -34,19 +34,23 @@ export default function TemplateEditor({ onSave }: Props) {
   }
 
   function handleAddSlot() {
-    setTemplate((prev) => ({
-      ...prev,
-      slots: [
-        ...prev.slots,
-        {
-          id: crypto.randomUUID(),
-          x: 100,
-          y: 100,
-          width: 300,
-          height: 400,
-        },
-      ],
-    }));
+    setTemplate((prev) => {
+      const firstSlot = prev.slots[0];
+
+      return {
+        ...prev,
+        slots: [
+          ...prev.slots,
+          {
+            id: crypto.randomUUID(),
+            x: 100,
+            y: 100,
+            width: firstSlot ? firstSlot.width : 550,
+            height: firstSlot ? firstSlot.height : 400,
+          },
+        ],
+      };
+    });
   }
 
   function handleSave() {
@@ -54,15 +58,17 @@ export default function TemplateEditor({ onSave }: Props) {
     onSave(runtime);
   }
 
+  const isTemplateInvalid = !template.backgroundImage || template.slots.length === 0;
+
   return (
     <div className="text-[#232020]  flex h-screen bg-[#ffdfc7]">
       {/* Toolbar */}
-      <div className="w-60  space-y-4 px-3 py-8">
+      <div className="max-w-60 space-y-4 px-3 py-8">
         <div className="text-xl text-center font-mono font-semibold italic tracking-tighter">
           Loco Booth
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 flex flex-col items-center">
           <label
             className={clsx(
               "inline-flex items-center justify-center cursor-pointer p-2 w-40",
@@ -88,8 +94,13 @@ export default function TemplateEditor({ onSave }: Props) {
             Add Slot
           </Button>
 
-          <Button className="w-40" onClick={handleSave}>
-            Save Template
+          <Button className="w-40" disabled={isTemplateInvalid} onClick={handleSave}>
+            Next
+            <img
+              className="size-9"
+              src="./assets/icons/right-arrow.svg"
+              alt="right arrow"
+            />
           </Button>
         </div>
       </div>

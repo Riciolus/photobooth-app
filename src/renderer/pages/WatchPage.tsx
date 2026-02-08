@@ -1,10 +1,15 @@
 import { StripTemplate } from "src/shared/types";
 import StripPreview from "../components/StripPreview";
 import { StripPreviewState } from "../App";
+import { Button } from "../ui/Button";
+import { useState } from "react";
+
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 1;
+const STEP = 0.1;
 
 const A4_WIDTH = 2480;
 const A4_HEIGHT = 3508;
-const PREVIEW_SCALE = 0.2; // adjust zoom
 
 type Props = {
   template: StripTemplate;
@@ -12,32 +17,74 @@ type Props = {
 };
 
 export default function WatchPage({ template, strips }: Props) {
+  const [scale, setScale] = useState(0.4);
+
   const activeIndex = strips.findIndex(
     (s) => s.photos.length < template.photoSlots.length
   );
 
+  function zoomIn() {
+    setScale((s) => Math.min(MAX_SCALE, +(s + STEP).toFixed(2)));
+  }
+
+  function zoomOut() {
+    setScale((s) => Math.max(MIN_SCALE, +(s - STEP).toFixed(2)));
+  }
+
+  const paperWidth = template.canvas.width * strips.length;
+  const paperHeight = template.canvas.height;
+
   return (
-    <div className="text-[#121212] p-3 flex w-full h-screen bg-[#fefefe]">
-      {/* PAPER */}
-      <div
-        style={{
-          position: "relative",
-          width: A4_WIDTH,
-          height: A4_HEIGHT,
-          transform: `scale(${PREVIEW_SCALE})`,
-          transformOrigin: "top left",
-          background: "white",
-        }}
-      >
-        {strips.map((strip, index) => (
-          <StripPreview
-            key={index}
-            template={template}
-            photos={strip.photos}
-            index={index}
-            active={index === activeIndex}
-          />
-        ))}
+    <div className="text-[#232020] flex h-screen bg-[#ffdfc7] w-screen overflow-hidden">
+      {/* Toolbar */}
+      <div className="max-w-60 space-y-4 px-3 py-8">
+        <div className="text-xl text-center font-mono font-semibold italic tracking-tighter">
+          Loco Booth
+        </div>
+
+        <div className="space-y-3 flex flex-col items-center">
+          <Button className="w-40">Export Image</Button>
+
+          <Button className="w-40">
+            Back
+            <img
+              className="size-9 rotate-180"
+              src="./assets/icons/right-arrow.svg"
+              alt="right arrow"
+            />
+          </Button>
+        </div>
+      </div>
+
+      {/* Canvas Area */}
+      <div className="w-full py-3 pr-3 max-h-screen h-full overflow-hidden">
+        <div className="w-full h-full flex items-center justify-center overflow-hidden bg-[#fff9f1] rounded-3xl">
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                width: paperWidth,
+                height: paperHeight,
+                background: "white",
+              }}
+            >
+              {strips.map((strip, index) => (
+                <StripPreview
+                  key={index}
+                  template={template}
+                  photos={strip.photos}
+                  index={index}
+                  active={index === activeIndex}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

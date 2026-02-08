@@ -1,13 +1,13 @@
 import { EditableTemplate, PhotoSlot } from "src/shared/types";
 import { SlotOverlay } from "./SlotOverlay";
 import { useState } from "react";
+import { Button } from "../ui/Button";
 
 type Props = {
   template: EditableTemplate;
   onChange: (t: EditableTemplate) => void;
 };
 
-const SCALE = 0.4; // contoh, nanti bisa dynamic
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 1.5;
 const STEP = 0.1;
@@ -34,21 +34,11 @@ export function CanvasStage({ template, onChange }: Props) {
     <div className="relative w-full h-full bg-[#fff9f1] rounded-3xl overflow-hidden">
       {/* ZOOM CONTROLS */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
-        <button
-          onClick={zoomOut}
-          className="px-3 py-1 rounded-lg bg-white shadow font-mono"
-        >
-          −
-        </button>
-        <div className="px-3 py-1 rounded-lg bg-white shadow font-mono">
+        <Button onClick={zoomOut}>−</Button>
+        <Button className="text-base bg-transparent hover:bg-transparent">
           {Math.round(scale * 100)}%
-        </div>
-        <button
-          onClick={zoomIn}
-          className="px-3 py-1 rounded-lg bg-white shadow font-mono"
-        >
-          +
-        </button>
+        </Button>
+        <Button onClick={zoomIn}>+</Button>
       </div>
 
       {/* VIEWPORT */}
