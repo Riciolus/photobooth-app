@@ -78,7 +78,7 @@ export default function TemplateEditor({ onSave }: Props) {
               "hover:bg-lime-500/10"
             )}
           >
-            Upload Strip
+            {template.backgroundImage ? "Replace" : "Upload"} Strip
             <input
               type="file"
               accept="image/png"

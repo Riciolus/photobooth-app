@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 1;
-const STEP = 0.1;
+const STEP = 0.025;
 
 const A4_WIDTH = 2480;
 const A4_HEIGHT = 3508;
@@ -58,6 +58,14 @@ export default function WatchPage({ template, strips }: Props) {
 
       {/* Canvas Area */}
       <div className="w-full py-3 pr-3 max-h-screen h-full overflow-hidden">
+        <div className="absolute top-4 right-4 z-10 flex gap-2">
+          <Button onClick={zoomOut}>−</Button>
+          <Button className="text-base bg-transparent hover:bg-transparent">
+            {Math.round(scale * 100)}%
+          </Button>
+          <Button onClick={zoomIn}>+</Button>
+        </div>
+
         <div className="w-full h-full flex items-center justify-center overflow-hidden bg-[#fff9f1] rounded-3xl">
           <div
             style={{

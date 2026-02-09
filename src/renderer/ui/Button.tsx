@@ -38,7 +38,7 @@ export function Button({
       disabled={disabled || isLoading}
       className={clsx(
         "inline-flex items-center justify-center font-mono rounded-2xl font-medium",
-        "transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
+        "transition-colors focus:outline-none",
         VARIANT_STYLES[variant],
         SIZE_STYLES[size],
         (disabled || isLoading) &&

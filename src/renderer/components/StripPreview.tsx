@@ -11,7 +11,8 @@ export default function StripPreview({ template, photos, index, active }: Props)
   const stripWidth = template.canvas.width;
   const stripHeight = template.canvas.height;
 
-  const x = index * stripWidth; // 🔥 mepet kiri ke kanan
+  const STRIP_GAP = 30;
+  const x = index * (stripWidth + STRIP_GAP);
 
   return (
     <div
@@ -21,7 +22,7 @@ export default function StripPreview({ template, photos, index, active }: Props)
         top: 0,
         width: stripWidth,
         height: stripHeight,
-        outline: active ? "4px solid red" : "none",
+        outline: active ? "8px solid red" : "none",
         backgroundImage: `url(${template.canvas.backgroundImage})`,
         backgroundSize: "contain",
         backgroundRepeat: "no-repeat",
