@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
+import { ExportPaperPayload } from "src/shared/render";
 import { StripTemplate } from "src/shared/types";
 
 console.log("🔥 PRELOAD LOADED");
@@ -13,9 +14,13 @@ contextBridge.exposeInMainWorld("api", {
     });
   },
 
+  pickBackground: () => ipcRenderer.invoke("pick-background"),
+
   onStripReady: (cb: (strip: { index: number; path: string }) => void) =>
     ipcRenderer.on("strip-ready", (_e, data) => cb(data)),
 
   onPhotoAdded: (cb: (path: string) => void) =>
     ipcRenderer.on("photo-added", (_, data) => cb(data)),
+
+  exportPaper: (data: ExportPaperPayload) => ipcRenderer.send("export-paper", data),
 });

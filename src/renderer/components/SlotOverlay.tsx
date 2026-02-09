@@ -4,9 +4,9 @@ import { PhotoSlot } from "src/shared/types";
 type Props = {
   slot: PhotoSlot;
   idx: number;
+  scale: number; // 🔥 WAJIB
   onChange: (slot: PhotoSlot) => void;
 };
-
 const SLOT_COLORS = [
   {
     bg: "bg-red-200/50",
@@ -34,20 +34,23 @@ const SLOT_COLORS = [
   },
 ];
 
-export function SlotOverlay({ slot, onChange, idx }: Props) {
+export function SlotOverlay({ slot, idx, scale, onChange }: Props) {
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);
-  const resizeRef = useRef<{ w: number; h: number; sx: number; sy: number } | null>(
-    null
-  );
+  const resizeRef = useRef<{
+    w: number;
+    h: number;
+    sx: number;
+    sy: number;
+  } | null>(null);
 
-  /* ===== MOVE SLOT ===== */
+  /* ===== MOVE ===== */
   function onPointerDownMove(e: React.PointerEvent) {
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
 
     dragRef.current = {
-      dx: e.clientX - slot.x,
-      dy: e.clientY - slot.y,
+      dx: e.clientX / scale - slot.x,
+      dy: e.clientY / scale - slot.y,
     };
   }
 
@@ -56,8 +59,8 @@ export function SlotOverlay({ slot, onChange, idx }: Props) {
 
     onChange({
       ...slot,
-      x: Math.round(e.clientX - dragRef.current.dx),
-      y: Math.round(e.clientY - dragRef.current.dy),
+      x: Math.round(e.clientX / scale - dragRef.current.dx),
+      y: Math.round(e.clientY / scale - dragRef.current.dy),
     });
   }
 
@@ -66,7 +69,7 @@ export function SlotOverlay({ slot, onChange, idx }: Props) {
     e.currentTarget.releasePointerCapture(e.pointerId);
   }
 
-  /* ===== RESIZE SLOT ===== */
+  /* ===== RESIZE ===== */
   function onPointerDownResize(e: React.PointerEvent) {
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -82,8 +85,8 @@ export function SlotOverlay({ slot, onChange, idx }: Props) {
   function onPointerMoveResize(e: React.PointerEvent) {
     if (!resizeRef.current) return;
 
-    const dx = e.clientX - resizeRef.current.sx;
-    const dy = e.clientY - resizeRef.current.sy;
+    const dx = (e.clientX - resizeRef.current.sx) / scale;
+    const dy = (e.clientY - resizeRef.current.sy) / scale;
 
     onChange({
       ...slot,
@@ -101,12 +104,7 @@ export function SlotOverlay({ slot, onChange, idx }: Props) {
 
   return (
     <div
-      className={`
-      ${color.bg}
-      ${color.border}
-      flex justify-center items-center
-      border-2 border-dashed
-    `}
+      className={`${color.bg} ${color.border} border-2 border-dashed flex items-center justify-center`}
       onPointerDown={onPointerDownMove}
       onPointerMove={onPointerMoveMove}
       onPointerUp={onPointerUpMove}
@@ -120,16 +118,14 @@ export function SlotOverlay({ slot, onChange, idx }: Props) {
         cursor: "move",
       }}
     >
-      <div className={`text-5xl font-semibold font-sans ${color.text}`}>
-        {idx + 1}
-      </div>
+      <div className={`text-5xl font-semibold ${color.text}`}>{idx + 1}</div>
 
-      {/* Resize handle */}
+      {/* RESIZE HANDLE */}
       <div
         onPointerDown={onPointerDownResize}
         onPointerMove={onPointerMoveResize}
         onPointerUp={onPointerUpResize}
-        className={`${color.handle}`}
+        className={color.handle}
         style={{
           position: "absolute",
           right: -6,

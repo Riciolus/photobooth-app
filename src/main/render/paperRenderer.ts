@@ -1,56 +1,67 @@
 import sharp from "sharp";
-import fs from "fs/promises";
 import path from "path";
-import { PaperTemplate } from "src/shared/paper";
-import { computeStripRects } from "./layout/computeStripRects";
+import { StripTemplate } from "src/shared/types";
+import { StripPreviewState } from "src/renderer/App";
 
-export async function renderPaper({
-  paper,
-  stripPath,
-  outputPath,
-}: {
-  paper: PaperTemplate;
-  stripPath: string;
+type RenderInput = {
+  template: StripTemplate;
+  strips: StripPreviewState[];
   outputPath: string;
-}) {
-  // ensure output dir exists
-  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+};
 
-  // read strip image
-  const stripImage = sharp(stripPath).rotate(paper.layout.rotateStrip ?? 90);
-  const stripMeta = await stripImage.metadata();
+export async function renderPaper({ template, strips, outputPath }: RenderInput) {
+  const stripWidth = template.canvas.width;
+  const stripHeight = template.canvas.height;
 
-  if (!stripMeta.width || !stripMeta.height) {
-    throw new Error("Invalid strip image dimensions");
-  }
+  const paperWidth = stripWidth * strips.length;
+  const paperHeight = stripHeight;
 
-  const stripSize =
-    paper.layout.rotateStrip === 90 || paper.layout.rotateStrip === 270
-      ? { width: stripMeta.height!, height: stripMeta.width! }
-      : { width: stripMeta.width!, height: stripMeta.height! };
-
-  // compute layout rects
-  const rects = computeStripRects(paper, stripSize);
-
-  // create paper canvas
-  const canvas = sharp({
+  // 1️⃣ base paper
+  const paper = sharp({
     create: {
-      width: paper.canvas.width,
-      height: paper.canvas.height,
+      width: paperWidth,
+      height: paperHeight,
       channels: 4,
-      background: paper.canvas.background,
+      background: "#ffffff",
     },
   });
 
-  // prepare composites (reuse same strip buffer)
-  const stripBuffer = await stripImage.toBuffer();
+  const composites: sharp.OverlayOptions[] = [];
 
-  const composites = rects.map((r) => ({
-    input: stripBuffer,
-    top: r.y,
-    left: r.x,
-  }));
+  // 2️⃣ render each strip
 
-  // render final paper
-  await canvas.composite(composites).png().toFile(outputPath);
+  for (let i = 0; i < strips.length; i++) {
+    const strip = strips[i];
+    const xOffset = i * stripWidth;
+
+    // background
+    composites.push({
+      input: template.canvas.background.path,
+      left: xOffset,
+      top: 0,
+    });
+
+    for (let idx = 0; idx < strip.photos.length; idx++) {
+      const photo = strip.photos[idx];
+      const slot = template.photoSlots[idx];
+      if (!slot) continue;
+
+      // 🔥 MATCH object-fit: cover
+      const resized = await sharp(photo.path)
+        .resize(slot.width, slot.height, {
+          fit: "cover", // SAMA PERSIS kayak CSS
+          position: "center",
+        })
+        .toBuffer();
+
+      composites.push({
+        input: resized,
+        left: Math.round(xOffset + slot.x),
+        top: Math.round(slot.y),
+      });
+    }
+  }
+
+  // 3️⃣ composite everything
+  await paper.composite(composites).png({ quality: 100 }).toFile(outputPath);
 }

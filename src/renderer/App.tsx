@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { StripTemplate, SessionStage } from "src/shared/types";
 import TemplateEditor from "./pages/TemplateEditor";
 import WatchPage from "./pages/WatchPage";
+import { PhotoAsset } from "src/shared/render";
 
 /* ================= TYPES ================= */
 
@@ -12,7 +13,10 @@ type SessionViewState = {
 };
 
 export type StripPreviewState = {
-  photos: string[];
+  photos: {
+    path: string; // filesystem path
+    preview: string; // blob URL (UI only)
+  }[];
 };
 
 const MAX_STRIPS = 5;
@@ -21,7 +25,7 @@ const MAX_STRIPS = 5;
 
 function createEmptyStrips(): StripPreviewState[] {
   return Array.from({ length: MAX_STRIPS }, () => ({
-    photos: [] as string[],
+    photos: [] as PhotoAsset[],
   }));
 }
 
@@ -52,7 +56,10 @@ export default function App() {
 
         if (targetIndex === -1) return prev;
 
-        next[targetIndex].photos.push(path);
+        next[targetIndex].photos.push({
+          path, // filesystem path dari main
+          preview: `strip://${path}`, // atau blob URL kalau dari input file
+        });
         return next;
       });
     });

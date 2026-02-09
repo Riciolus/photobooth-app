@@ -1,4 +1,4 @@
-import { PaperTemplate } from "src/shared/paper";
+import { PaperTemplate } from "src/shared/render";
 
 export const A4_5_STRIPS: PaperTemplate = {
   id: "a4-5-strips",

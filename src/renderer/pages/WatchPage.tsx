@@ -43,7 +43,17 @@ export default function WatchPage({ template, strips }: Props) {
         </div>
 
         <div className="space-y-3 flex flex-col items-center">
-          <Button className="w-40">Export Image</Button>
+          <Button
+            className="w-40"
+            onClick={() => {
+              window.api.exportPaper({
+                template,
+                strips,
+              });
+            }}
+          >
+            Export Image
+          </Button>
 
           <Button className="w-40">
             Back

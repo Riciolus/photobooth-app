@@ -1,7 +1,7 @@
-import { EditableTemplate, PhotoSlot } from "src/shared/types";
-import { SlotOverlay } from "./SlotOverlay";
 import { useState } from "react";
+import { SlotOverlay } from "./SlotOverlay";
 import { Button } from "../ui/Button";
+import { EditableTemplate, PhotoSlot } from "src/shared/types";
 
 type Props = {
   template: EditableTemplate;
@@ -35,7 +35,7 @@ export function CanvasStage({ template, onChange }: Props) {
       {/* ZOOM CONTROLS */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <Button onClick={zoomOut}>−</Button>
-        <Button className="text-base bg-transparent hover:bg-transparent">
+        <Button className="bg-transparent pointer-events-none">
           {Math.round(scale * 100)}%
         </Button>
         <Button onClick={zoomIn}>+</Button>
@@ -43,20 +43,20 @@ export function CanvasStage({ template, onChange }: Props) {
 
       {/* VIEWPORT */}
       <div className="w-full h-full flex items-center justify-center">
-        {/* SCALE WRAPPER */}
+        {/* SCALE WRAPPER (UI ONLY) */}
         <div
           style={{
             transform: `scale(${scale})`,
             transformOrigin: "center",
           }}
         >
-          {/* REAL CANVAS */}
+          {/* REAL CANVAS (REAL PIXELS) */}
           <div
             className="relative"
             style={{
               width: template.canvas.width,
               height: template.canvas.height,
-              backgroundImage: `url(${template.backgroundImage})`,
+              backgroundImage: `url(${template.canvas.background.preview})`,
               backgroundRepeat: "no-repeat",
               backgroundSize: "contain",
               backgroundPosition: "center",
@@ -65,8 +65,9 @@ export function CanvasStage({ template, onChange }: Props) {
             {template.slots.map((slot, idx) => (
               <SlotOverlay
                 key={slot.id}
-                idx={idx}
                 slot={slot}
+                idx={idx}
+                scale={scale} // 🔥 KRUSIAL
                 onChange={updateSlot}
               />
             ))}

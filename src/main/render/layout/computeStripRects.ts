@@ -1,4 +1,4 @@
-import { PaperTemplate } from "src/shared/paper";
+import { PaperTemplate } from "src/shared/render";
 
 type Size = {
   width: number;
@@ -32,9 +32,7 @@ export function computeStripRects(paper: PaperTemplate, strip: Size): Rect[] {
   return Array.from({ length: copies }).map((_, i) => {
     const mainOffset =
       i *
-      (direction === "vertical"
-        ? strip.height + spacing
-        : strip.width + spacing);
+      (direction === "vertical" ? strip.height + spacing : strip.width + spacing);
 
     const x =
       direction === "vertical"

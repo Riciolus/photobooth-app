@@ -1,10 +1,13 @@
-import { app, BrowserWindow, protocol, ipcMain } from "electron";
+import { app, BrowserWindow, protocol, ipcMain, dialog } from "electron";
 import path from "path";
+import fs from "fs";
 
 import { startFolderWatcher } from "./watcher/folderWatcher";
-import { renderStrip } from "./render/stripRenderer";
 import { PaperSession } from "./domain/PaperSession";
 import { StripTemplate } from "../shared/types";
+import { renderPaper } from "./render/paperRenderer";
+import { ExportPaperPayload } from "src/shared/render";
+import sharp from "sharp";
 
 let win: BrowserWindow | null = null;
 let paperSession: PaperSession | null = null;
@@ -51,6 +54,24 @@ app.whenReady().then(() => {
     });
   });
 
+  ipcMain.handle("pick-background", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg"] }],
+    });
+
+    if (canceled || filePaths.length === 0) return null;
+
+    const filePath = filePaths[0];
+    const metadata = await sharp(filePath).metadata();
+
+    return {
+      path: filePath,
+      width: metadata.width!,
+      height: metadata.height!,
+    };
+  });
+
   // ============================
   // FOLDER WATCHER
   // ============================
@@ -76,6 +97,21 @@ app.whenReady().then(() => {
     win.webContents.send("strip-ready", {
       index: stripIndex,
       path: STRIP_PATH,
+    });
+  });
+
+  ipcMain.on("export-paper", async (_event, data: ExportPaperPayload) => {
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: "Export Strip Image",
+      defaultPath: "photobooth.png",
+      filters: [{ name: "PNG Image", extensions: ["png"] }],
+    });
+
+    if (canceled || !filePath) return;
+
+    await renderPaper({
+      ...data,
+      outputPath: filePath,
     });
   });
 });

@@ -7,6 +7,8 @@ declare global {
       onSessionUpdated: (callback: (state: SessionState) => void) => void;
       onStripReady: (cb: (strip: { index: number; path: string }) => void) => void;
       onPhotoAdded: (cb: (data: { path: string }) => void) => void;
+      exportPaper: (data: ExportPaperPayload) => void;
+      pickBackground: () => Promise<PickBackgroundResult>;
     };
   }
 }

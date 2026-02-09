@@ -3,7 +3,6 @@ import { EditableTemplate, PhotoSlot, StripTemplate } from "src/shared/types";
 import { CanvasStage } from "../components/CanvasStage";
 import { exportStripTemplate } from "../utils/exportTemplate";
 import { Button } from "../ui/Button";
-import clsx from "clsx";
 
 type Props = {
   onSave: (template: StripTemplate) => void;
@@ -11,26 +10,25 @@ type Props = {
 
 export default function TemplateEditor({ onSave }: Props) {
   const [template, setTemplate] = useState<EditableTemplate>({
-    backgroundImage: null,
-    canvas: { width: 0, height: 0 },
+    canvas: { width: 0, height: 0, background: { path: null, preview: null } },
     slots: [],
   });
 
-  function handleBackgroundUpload(file: File) {
-    const url = URL.createObjectURL(file);
+  async function handlePickBackground() {
+    const result = await window.api.pickBackground();
+    if (!result) return;
 
-    const img = new Image();
-    img.onload = () => {
-      setTemplate((prev) => ({
-        ...prev,
-        backgroundImage: url,
-        canvas: {
-          width: img.width,
-          height: img.height,
+    setTemplate((prev) => ({
+      ...prev,
+      canvas: {
+        width: result.width,
+        height: result.height,
+        background: {
+          path: result.path, // filesystem
+          preview: `strip://${result.path}`, // UI
         },
-      }));
-    };
-    img.src = url;
+      },
+    }));
   }
 
   function handleAddSlot() {
@@ -58,7 +56,8 @@ export default function TemplateEditor({ onSave }: Props) {
     onSave(runtime);
   }
 
-  const isTemplateInvalid = !template.backgroundImage || template.slots.length === 0;
+  const isTemplateInvalid =
+    !template.canvas.background || template.slots.length === 0;
 
   return (
     <div className="text-[#232020]  flex h-screen bg-[#ffdfc7]">
@@ -69,26 +68,9 @@ export default function TemplateEditor({ onSave }: Props) {
         </div>
 
         <div className="space-y-3 flex flex-col items-center">
-          <label
-            className={clsx(
-              "inline-flex items-center justify-center cursor-pointer p-2 w-40",
-              "font-mono font-semibold text-sm  rounded-2xl",
-              "transition-colors focus-within:ring-2 focus-within:ring-offset-2",
-              "bg-[#F06647] border-2 border-yellow-900 text-yellow-950",
-              "hover:bg-lime-500/10"
-            )}
-          >
-            {template.backgroundImage ? "Replace" : "Upload"} Strip
-            <input
-              type="file"
-              accept="image/png"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleBackgroundUpload(file);
-              }}
-            />
-          </label>
+          <Button className="w-40" onClick={handlePickBackground}>
+            Upload Strip
+          </Button>
 
           <Button className="w-40" onClick={handleAddSlot}>
             Add Slot

@@ -1,8 +1,9 @@
+import { PhotoAsset } from "src/shared/render";
 import { StripTemplate } from "src/shared/types";
 
 type Props = {
   template: StripTemplate;
-  photos: string[];
+  photos: PhotoAsset[];
   index: number;
   active: boolean;
 };
@@ -23,7 +24,7 @@ export default function StripPreview({ template, photos, index, active }: Props)
         width: stripWidth,
         height: stripHeight,
         outline: active ? "8px solid red" : "none",
-        backgroundImage: `url(${template.canvas.backgroundImage})`,
+        backgroundImage: `url(${template.canvas.background.preview})`,
         backgroundSize: "contain",
         backgroundRepeat: "no-repeat",
       }}
@@ -35,7 +36,7 @@ export default function StripPreview({ template, photos, index, active }: Props)
         return (
           <img
             key={i}
-            src={`strip://${photo}`}
+            src={photo.preview}
             style={{
               position: "absolute",
               left: slot.x,
