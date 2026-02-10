@@ -9,6 +9,7 @@ declare global {
       onPhotoAdded: (cb: (data: { path: string }) => void) => void;
       exportPaper: (data: ExportPaperPayload) => void;
       pickBackground: () => Promise<PickBackgroundResult>;
+      pickPhoto(): Promise<{ path: string } | null>;
     };
   }
 }

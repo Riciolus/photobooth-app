@@ -37,7 +37,7 @@ export function Button({
       type="button"
       disabled={disabled || isLoading}
       className={clsx(
-        "inline-flex items-center justify-center font-mono rounded-2xl font-medium",
+        "inline-flex items-center justify-center font-sans rounded-2xl font-medium",
         "transition-colors focus:outline-none p-1",
         VARIANT_STYLES[variant],
         SIZE_STYLES[size],

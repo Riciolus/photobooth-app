@@ -14,9 +14,10 @@ const STEP = 0.025;
 type Props = {
   template: StripTemplate;
   strips: StripPreviewState[];
+  onChangeStrips: React.Dispatch<React.SetStateAction<StripPreviewState[]>>;
 };
 
-export default function WatchPage({ template, strips }: Props) {
+export default function WatchPage({ template, strips, onChangeStrips }: Props) {
   const [scale, setScale] = useState(0.4);
 
   const activeIndex = strips.findIndex(
@@ -29,6 +30,24 @@ export default function WatchPage({ template, strips }: Props) {
 
   function zoomOut() {
     setScale((s) => Math.max(MIN_SCALE, +(s - STEP).toFixed(2)));
+  }
+
+  async function handleReplacePhoto(stripIndex: number, slotIndex: number) {
+    const result = await window.api.pickPhoto();
+    if (!result) return;
+
+    onChangeStrips((prev) => {
+      const next = prev.map((s) => ({
+        photos: [...s.photos],
+      }));
+
+      next[stripIndex].photos[slotIndex] = {
+        path: result.path,
+        preview: `strip://${result.path}`,
+      };
+
+      return next;
+    });
   }
 
   const paperWidth = template.canvas.width * strips.length;
@@ -98,6 +117,7 @@ export default function WatchPage({ template, strips }: Props) {
                   photos={strip.photos}
                   index={index}
                   active={index === activeIndex}
+                  onReplace={handleReplacePhoto}
                 />
               ))}
             </div>

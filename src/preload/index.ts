@@ -20,5 +20,7 @@ contextBridge.exposeInMainWorld("api", {
   onPhotoAdded: (cb: (path: string) => void) =>
     ipcRenderer.on("photo-added", (_, data) => cb(data)),
 
+  pickPhoto: () => ipcRenderer.invoke("pick-photo"),
+
   exportPaper: (data: ExportPaperPayload) => ipcRenderer.send("export-paper", data),
 });

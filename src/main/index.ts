@@ -99,6 +99,19 @@ app.whenReady().then(() => {
     });
   });
 
+  ipcMain.handle("pick-photo", async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ["openFile"],
+      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg"] }],
+    });
+
+    if (result.canceled || result.filePaths.length === 0) return null;
+
+    return {
+      path: result.filePaths[0],
+    };
+  });
+
   ipcMain.on("export-paper", async (_event, data: ExportPaperPayload) => {
     const { canceled, filePath } = await dialog.showSaveDialog({
       title: "Export Strip Image",

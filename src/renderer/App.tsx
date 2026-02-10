@@ -79,5 +79,7 @@ export default function App() {
     return <TemplateEditor onSave={handleTemplateSave} />;
   }
 
-  return <WatchPage template={template} strips={strips} />;
+  return (
+    <WatchPage template={template} strips={strips} onChangeStrips={setStrips} />
+  );
 }
