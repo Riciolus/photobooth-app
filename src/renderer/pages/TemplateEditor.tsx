@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EditableTemplate, PhotoSlot, StripTemplate } from "src/shared/types";
+import { EditableTemplate, StripTemplate } from "src/shared/types";
 import { CanvasStage } from "../components/CanvasStage";
 import { exportStripTemplate } from "../utils/exportTemplate";
 import { Button } from "../ui/Button";

@@ -2,8 +2,6 @@ import { contextBridge, ipcRenderer } from "electron";
 import { ExportPaperPayload } from "src/shared/render";
 import { StripTemplate } from "src/shared/types";
 
-console.log("🔥 PRELOAD LOADED");
-
 contextBridge.exposeInMainWorld("api", {
   startSession: (template: StripTemplate) =>
     ipcRenderer.send("start-session", template),

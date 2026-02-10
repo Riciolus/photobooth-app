@@ -1,6 +1,5 @@
 import { app, BrowserWindow, protocol, ipcMain, dialog } from "electron";
 import path from "path";
-import fs from "fs";
 
 import { startFolderWatcher } from "./watcher/folderWatcher";
 import { PaperSession } from "./domain/PaperSession";
@@ -38,8 +37,8 @@ app.whenReady().then(() => {
   // IPC: START SESSION (FROM UI)
   // ============================
   ipcMain.on("start-session", (_, template: StripTemplate) => {
-    console.log("🟢 start-session received");
-    console.log("📦 TEMPLATE RECEIVED", template);
+    // console.log("🟢 start-session received");
+    // console.log("📦 TEMPLATE RECEIVED", template);
 
     paperSession = new PaperSession(template, 5);
 

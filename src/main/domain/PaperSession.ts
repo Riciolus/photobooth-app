@@ -6,10 +6,6 @@ export type StripResult = {
   path: string;
 };
 
-type CompletedStrip = {
-  photos: string[];
-};
-
 export class PaperSession {
   private maxStrips: number;
   private template: StripTemplate;

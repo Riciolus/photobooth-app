@@ -24,7 +24,7 @@ export class StripSession {
 
     if (this.photos.length === this.template.photoSlots.length) {
       this.stage = "READY";
-      console.log("🎉 StripSession READY", this.photos);
+      // console.log("🎉 StripSession READY", this.photos);
     }
   }
 

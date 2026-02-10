@@ -8,8 +8,8 @@ const MIN_SCALE = 0.2;
 const MAX_SCALE = 1;
 const STEP = 0.025;
 
-const A4_WIDTH = 2480;
-const A4_HEIGHT = 3508;
+// const A4_WIDTH = 2480;
+// const A4_HEIGHT = 3508;
 
 type Props = {
   template: StripTemplate;
