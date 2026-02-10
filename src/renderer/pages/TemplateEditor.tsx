@@ -108,7 +108,11 @@ export default function TemplateEditor({ onSave }: Props) {
           </div>
 
           <div className="flex w-40 space-x-2">
-            <Button className="w-full" onClick={handleAddSlot}>
+            <Button
+              disabled={template.canvas.background.preview ? false : true}
+              className="w-full"
+              onClick={handleAddSlot}
+            >
               Add Slot
             </Button>
 
