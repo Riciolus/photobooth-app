@@ -56,7 +56,7 @@ export default function WatchPage({ template, strips, onChangeStrips }: Props) {
   return (
     <div className="text-[#232020] flex h-screen bg-[#ffdfc7] w-screen overflow-hidden">
       {/* Toolbar */}
-      <div className="max-w-60 space-y-4 px-3 py-8">
+      <div className="max-w-52 w-full space-y-4 px-3 py-8">
         <div className="text-xl text-center font-mono font-semibold italic tracking-tighter">
           Loco Booth
         </div>

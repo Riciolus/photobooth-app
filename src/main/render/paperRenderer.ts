@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import path from "path";
 import { StripTemplate } from "src/shared/types";
 import { StripPreviewState } from "src/renderer/App";
 
