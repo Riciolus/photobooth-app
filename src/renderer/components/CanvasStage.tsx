@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { SlotOverlay } from "./SlotOverlay";
 import { Button } from "../ui/Button";
 import { EditableTemplate, PhotoSlot } from "src/shared/types";
@@ -13,7 +13,35 @@ const MAX_SCALE = 1.5;
 const STEP = 0.1;
 
 export function CanvasStage({ template, onChange }: Props) {
-  const [scale, setScale] = useState(0.4);
+  const [scale, setScale] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+
+    const resize = () => {
+      const { width, height } = containerRef.current!.getBoundingClientRect();
+
+      if (!template.canvas.width || !template.canvas.height) {
+        setScale(1);
+        return;
+      }
+
+      const fitScale = Math.min(
+        width / template.canvas.width,
+        height / template.canvas.height
+      );
+
+      setScale(fitScale);
+    };
+
+    resize();
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, [template]);
 
   function updateSlot(updatedSlot: PhotoSlot) {
     onChange({
@@ -42,7 +70,10 @@ export function CanvasStage({ template, onChange }: Props) {
       </div>
 
       {/* VIEWPORT */}
-      <div className="w-full h-full flex items-center justify-center">
+      <div
+        ref={containerRef}
+        className="w-full h-full flex items-center justify-center"
+      >
         {/* SCALE WRAPPER (UI ONLY) */}
         <div
           style={{

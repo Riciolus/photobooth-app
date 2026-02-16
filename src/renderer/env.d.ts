@@ -13,8 +13,3 @@ declare global {
     };
   }
 }
-
-// NOTE
-// zoom drag
-// save preset
-// file path options

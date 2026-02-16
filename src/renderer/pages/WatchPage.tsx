@@ -2,10 +2,10 @@ import { StripTemplate } from "src/shared/types";
 import StripPreview from "../components/StripPreview";
 import { StripPreviewState } from "../App";
 import { Button } from "../ui/Button";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 const MIN_SCALE = 0.2;
-const MAX_SCALE = 1;
+const MAX_SCALE = 0.56;
 const STEP = 0.025;
 
 // const A4_WIDTH = 2480;
@@ -18,7 +18,33 @@ type Props = {
 };
 
 export default function WatchPage({ template, strips, onChangeStrips }: Props) {
-  const [scale, setScale] = useState(0.4);
+  const [scale, setScale] = useState(1);
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  const paperWidth = template.canvas.width * strips.length;
+  const paperHeight = template.canvas.height;
+
+  useLayoutEffect(() => {
+    if (!viewportRef.current) return;
+
+    const resize = () => {
+      const { width, height } = viewportRef.current!.getBoundingClientRect();
+
+      const fitScale = Math.min(width / paperWidth, height / paperHeight);
+
+      // biar ga terlalu mepet ke Y direction
+      const paddedScale = fitScale * 0.97;
+
+      setScale(Math.min(MAX_SCALE, paddedScale));
+    };
+
+    resize();
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(viewportRef.current);
+
+    return () => observer.disconnect();
+  }, [paperWidth, paperHeight]);
 
   const activeIndex = strips.findIndex(
     (s) => s.photos.length < template.photoSlots.length
@@ -49,9 +75,6 @@ export default function WatchPage({ template, strips, onChangeStrips }: Props) {
       return next;
     });
   }
-
-  const paperWidth = template.canvas.width * strips.length;
-  const paperHeight = template.canvas.height;
 
   return (
     <div className="text-[#232020] flex h-screen bg-[#ffdfc7] w-screen overflow-hidden">
@@ -86,7 +109,10 @@ export default function WatchPage({ template, strips, onChangeStrips }: Props) {
       </div>
 
       {/* Canvas Area */}
-      <div className="w-full py-3 pr-3 max-h-screen h-full overflow-hidden">
+      <div
+        ref={viewportRef}
+        className="w-full py-3 pr-3 max-h-screen h-full overflow-hidden"
+      >
         <div className="absolute top-4 right-4 z-10 flex gap-2">
           <Button onClick={zoomOut}>−</Button>
           <Button className="text-base bg-transparent hover:bg-transparent">
