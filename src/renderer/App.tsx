@@ -73,6 +73,11 @@ export default function App() {
     window.api.startSession(template);
   }
 
+  function handleBack() {
+    setTemplate(null);
+    setSession(null);
+  }
+
   /* ============ RENDER ============ */
 
   if (!template || !session) {
@@ -80,6 +85,11 @@ export default function App() {
   }
 
   return (
-    <WatchPage template={template} strips={strips} onChangeStrips={setStrips} />
+    <WatchPage
+      template={template}
+      strips={strips}
+      onChangeStrips={setStrips}
+      onBack={handleBack}
+    />
   );
 }

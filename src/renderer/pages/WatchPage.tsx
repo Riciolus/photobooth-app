@@ -15,9 +15,15 @@ type Props = {
   template: StripTemplate;
   strips: StripPreviewState[];
   onChangeStrips: React.Dispatch<React.SetStateAction<StripPreviewState[]>>;
+  onBack: () => void;
 };
 
-export default function WatchPage({ template, strips, onChangeStrips }: Props) {
+export default function WatchPage({
+  template,
+  strips,
+  onChangeStrips,
+  onBack,
+}: Props) {
   const [scale, setScale] = useState(1);
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -97,7 +103,7 @@ export default function WatchPage({ template, strips, onChangeStrips }: Props) {
             Export Image
           </Button>
 
-          <Button className="w-40">
+          <Button onClick={onBack} className="w-40">
             Back
             <img
               className="size-9 rotate-180"
