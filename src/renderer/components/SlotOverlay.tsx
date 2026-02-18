@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { PhotoSlot } from "src/shared/types";
+import { SLOT_COLORS } from "../constants/slotColors";
 
 type Props = {
   slot: PhotoSlot;
@@ -7,32 +8,6 @@ type Props = {
   scale: number; // 🔥 WAJIB
   onChange: (slot: PhotoSlot) => void;
 };
-const SLOT_COLORS = [
-  {
-    bg: "bg-red-200/50",
-    border: "border-red-500",
-    handle: "bg-red-500",
-    text: "text-red-700",
-  },
-  {
-    bg: "bg-green-200/50",
-    border: "border-green-500",
-    handle: "bg-green-500",
-    text: "text-green-700",
-  },
-  {
-    bg: "bg-blue-200/50",
-    border: "border-blue-500",
-    handle: "bg-blue-500",
-    text: "text-blue-700",
-  },
-  {
-    bg: "bg-yellow-200/50",
-    border: "border-yellow-500",
-    handle: "bg-yellow-500",
-    text: "text-yellow-700",
-  },
-];
 
 export function SlotOverlay({ slot, idx, scale, onChange }: Props) {
   const dragRef = useRef<{ dx: number; dy: number } | null>(null);

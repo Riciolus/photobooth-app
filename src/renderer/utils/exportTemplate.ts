@@ -7,12 +7,12 @@ export function exportStripTemplate(editable: EditableTemplate): StripTemplate {
   }
 
   return {
-    id: "custom-template",
+    id: crypto.randomUUID(),
 
     canvas: {
       width: editable.canvas.width,
       height: editable.canvas.height,
-      background: editable.canvas.background, // 🔥 path + preview
+      background: editable.canvas.background,
     },
 
     photoSlots: editable.slots.map((slot) => ({

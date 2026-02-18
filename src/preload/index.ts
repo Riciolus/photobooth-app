@@ -14,6 +14,11 @@ contextBridge.exposeInMainWorld("api", {
 
   pickBackground: () => ipcRenderer.invoke("pick-background"),
 
+  saveTemplate: (template: StripTemplate) =>
+    ipcRenderer.invoke("template-save", template),
+
+  getTemplates: () => ipcRenderer.invoke("template-getAll"),
+
   onStripReady: (cb: (strip: { index: number; path: string }) => void) =>
     ipcRenderer.on("strip-ready", (_e, data) => cb(data)),
 

@@ -7,6 +7,7 @@ import { StripTemplate } from "../shared/types";
 import { renderPaper } from "./render/paperRenderer";
 import { ExportPaperPayload } from "src/shared/render";
 import sharp from "sharp";
+import { mkdir, writeFile, readdir, readFile, stat, unlink } from "fs/promises";
 
 let win: BrowserWindow | null = null;
 let paperSession: PaperSession | null = null;
@@ -125,5 +126,83 @@ app.whenReady().then(() => {
       ...data,
       outputPath: filePath,
     });
+  });
+
+  async function ensureTemplateDir() {
+    const dir = path.join(app.getPath("userData"), "templates");
+    await mkdir(dir, { recursive: true });
+    return dir;
+  }
+
+  const MAX_TEMPLATES = 3;
+  ipcMain.handle("template-save", async (_, template: StripTemplate) => {
+    try {
+      const dir = await ensureTemplateDir();
+
+      const files = (await readdir(dir)).filter((f) => f.endsWith(".json"));
+
+      if (files.length >= MAX_TEMPLATES) {
+        const fileStats = await Promise.all(
+          files.map(async (file) => {
+            const filePath = path.join(dir, file);
+            const stats = await stat(filePath);
+
+            return {
+              filePath,
+              mtime: stats.mtime.getTime(),
+            };
+          })
+        );
+
+        fileStats.sort((a, b) => a.mtime - b.mtime);
+
+        await unlink(fileStats[0].filePath);
+      }
+
+      const filePath = path.join(dir, `${template.id}.json`);
+
+      await writeFile(filePath, JSON.stringify(template, null, 2), "utf-8");
+
+      return {
+        success: true,
+        id: template.id,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  });
+
+  ipcMain.handle("template-getAll", async () => {
+    try {
+      const dir = await ensureTemplateDir();
+
+      const files = await readdir(dir);
+
+      const templates = [];
+
+      for (const file of files) {
+        if (!file.endsWith(".json")) continue;
+
+        const filePath = path.join(dir, file);
+        const content = await readFile(filePath, "utf-8");
+
+        const parsed = JSON.parse(content);
+
+        templates.push(parsed);
+      }
+
+      return {
+        success: true,
+        templates,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   });
 });

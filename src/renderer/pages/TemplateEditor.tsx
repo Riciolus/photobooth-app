@@ -3,6 +3,7 @@ import { EditableTemplate, StripTemplate } from "src/shared/types";
 import { CanvasStage } from "../components/CanvasStage";
 import { exportStripTemplate } from "../utils/exportTemplate";
 import { Button } from "../ui/Button";
+import LoadTemplateModal from "../components/TemplateModal";
 
 type Props = {
   onSave: (template: StripTemplate) => void;
@@ -13,6 +14,7 @@ export default function TemplateEditor({ onSave }: Props) {
     canvas: { width: 0, height: 0, background: { path: null, preview: null } },
     slots: [],
   });
+  const [modalOpen, setModalOpen] = useState(false);
 
   async function handlePickBackground() {
     const result = await window.api.pickBackground();
@@ -43,6 +45,17 @@ export default function TemplateEditor({ onSave }: Props) {
         },
       },
     }));
+  }
+
+  async function handleLoadTemplates() {
+    const result = await window.api.getTemplates();
+
+    if (!result.success) {
+      return;
+    }
+
+    setModalOpen(true);
+    // show popup with preview
   }
 
   function handleAddSlot() {
@@ -76,6 +89,8 @@ export default function TemplateEditor({ onSave }: Props) {
 
   function handleSave() {
     const runtime = exportStripTemplate(template);
+
+    window.api.saveTemplate(runtime);
     onSave(runtime);
   }
 
@@ -84,6 +99,14 @@ export default function TemplateEditor({ onSave }: Props) {
 
   return (
     <div className="text-[#232020]  flex h-screen bg-[#ffdfc7]">
+      <LoadTemplateModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSelect={(template) => {
+          onSave(template); // your active template state
+        }}
+      />
+
       {/* Toolbar */}
       <div className="max-w-52 w-full space-y-4 px-3 py-8">
         <div className="text-xl text-center font-mono font-semibold italic tracking-tighter">
@@ -106,6 +129,10 @@ export default function TemplateEditor({ onSave }: Props) {
               </Button>
             )}
           </div>
+
+          <Button className="w-40" onClick={handleLoadTemplates}>
+            Load Strip
+          </Button>
 
           <div className="flex w-40 space-x-2">
             <Button
